@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="sale_order_view_inherit">
+        <field name="name">sale.order.view.inherit1</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                <field name="weight"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="sale_order_weight_view_inherit">
+        <field name="name">sale.order.weight.view.inherit1</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='order_lines']/group" position="after">
+                <group>
+                    <group name="weight" string="Total Weight">
+                        <group>
+                            <label for="total_weight"/>
+                            <div class="o_row">
+                                <field name="total_weight" class="oe_inline"/>  kg
+                                <span><field name="weight_unit"/></span>
+                            </div>
+                        </group>
+                    </group>         
+                </group>               
+            </xpath>
+        </field>
+    </record>
+</odoo>    
+
+
+ 

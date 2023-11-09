@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="purchase_order_view_inherit">
+        <field name="name">purchase.order.view.inherit1</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='taxes_id']" position="before">
+                <field name="weight"/>
+                <field name="new_price" invisible="1"/>
+            </xpath>
+            <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='qty_received']" position="after">
+                <field name="per_kg_price" attrs="{'column_invisible': [('parent.state', 'not in', ('purchase', 'done'))]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="purchase_order_weight_view_inherit">
+        <field name="name">purchase.order.weight.view.inherit1</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='products']/group" position="after">
+                <group>
+                    <group name="weight" string="Total Weight">
+                        <group>
+                            <label for="total_weight"/>
+                            <div class="o_row">
+                                <field name="total_weight" class="oe_inline"/> kg
+                                <span><field name="weight_unit"/></span>
+                            </div>
+                        </group>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>  

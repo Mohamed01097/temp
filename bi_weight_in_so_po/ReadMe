@@ -1,0 +1,41 @@
+Date: 21/12/2022
+Version: 16.0.0.1
+Bug Fixing:
+    - Made weight field view proper in purchase order form.
+
+Date: 13/07/2023
+Version: 16.0.0.2
+Add:
+    - Add weight details on all reports (SO/PO/Delivery/Receipt)
+    
+=> 16.0.0.3 : Improved an index as per latest improvements.
+Add:
+    - Add weight details on all reports (SO/PO/Delivery/Receipt)
+
+
+16.0.0.4 ==> Added customization points.
+
+Date: 19/10/2023
+Version: 16.0.0.5
+Add:
+    - Make weight field editable in stock move line.
+    - Calculate price per weight in so line, po line and invoice line.
+
+Date: 31/10/2023
+Version: 16.0.0.6
+Bug Fixing:
+    - Fixed the issue of quantity and weight on account move line.
+    - Change the calculation of total weight on sales order, purchase order and stocks.
+    - Fixed the issue in weight calculation on stock move lines.
+
+Date: 01/11/2023
+Version: 16.0.0.7
+Bug Fixing:
+    - Fixed the unit price calculation issue when change weight in purchase order. 
+    - Fixed the calculation issue of subtotal when change weight in sales order line and purchase order line.
+
+Date: 09/11/2023
+Version: 16.0.0.8
+Add:
+    - Remove calculation of price subtotal on po line, so line and invoice line.
+    - Add per kg price on po line.

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- weight in sale report -->
+    <template id="weight_report_saleorder_document" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//table/tbody" position="after">
+            <tr>
+                <td colspan="3">
+                    <strong>Total Weight (kg)</strong>
+                </td>
+                <td class="text-end">
+                    <span t-field="doc.total_weight"/>
+                </td>
+            </tr>
+        </xpath>
+        <xpath expr="//table/thead/tr[1]/th[3]" position="after">
+            <th class="text-end">Weight(kg)</th>
+        </xpath>
+        <xpath expr="//table//tbody//tr[1]//td[3]" position="after">
+            <td class="text-end">
+                <span class="text-end" t-esc="line.weight" t-options='{"widget": "float", "precision": 2}'/>
+            </td>
+        </xpath>
+    </template>
+
+    <!-- weight in purcahse RFQ -->
+    <template id="weight_report_purchasequotation_document" inherit_id="purchase.report_purchasequotation_document">
+        <xpath expr="//table" position="after">
+            <div id="total" class="row justify-content-end">
+                <div class="col-4">
+                    <table class="table table-sm table-borderless">
+                        <tr class="border-black">
+                            <td>
+                                <strong>Total Weight (kg)</strong>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="o.total_weight"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </xpath>
+
+        <xpath expr="//table/thead/tr[1]/th[3]" position="after">
+            <th class="text-end">Weight(kg)</th>
+        </xpath>
+        <xpath expr="//table//tbody//tr[1]//td[3]" position="after">
+            <td class="text-end">
+                <span class="text-end" t-esc="order_line.weight" t-options='{"widget": "float", "precision": 2}'/>
+            </td>
+        </xpath>
+    </template>
+
+    <!-- weight in purchse order -->
+    <template id="weight_purchase_order_report" inherit_id="purchase.report_purchaseorder_document">
+        <xpath expr="//table/tbody/t[2]" position="after">
+            <tr>
+                <td colspan="2">
+                    <strong>Total Weight (kg)</strong>
+                </td>
+                <td class="text-end">
+                    <span t-field="o.total_weight"/>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </xpath>
+        <xpath expr="//table/thead/tr/th[@name='th_taxes']" position="after">
+            <th name="th_weight" class="text-end">
+                <strong>Weight(kg)</strong>
+            </th>
+        </xpath>
+        <xpath expr="//td[@name='td_taxes']" position="after">
+            <td name="td_weight" class="text-end">
+                <span t-field="line.weight"/>
+            </td>
+        </xpath>
+    </template>
+
+    <template id="weight_report_picking" inherit_id="stock.report_picking">
+        
+        <xpath expr="//table" position="after">
+            <div id="total" class="row justify-content-end">
+                <div class="col-4">
+                    <table class="table table-sm table-borderless">
+                        <tr class="border-black">
+                            <td>
+                                <strong>Total Weight (kg)</strong>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="o.total_weight"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </xpath>
+
+        <xpath expr="//table/thead/tr/th[6]" position="after">
+            <th name="th_weight" class="text-end">
+                <strong>Weight(kg)</strong>
+            </th>
+        </xpath>
+        
+        <xpath expr="//table[1]/tbody/t/tr/td[6]" position="after">
+            <t t-if="o.purchase_id">
+                <td class="text-end">
+                   <span t-field="ml.move_id.extra_weight" t-options='{"widget": "float", "precision": 2}'/>
+                </td>
+            </t>
+            <t t-else=" ">
+                <td class="text-end">
+                    <span t-field="ml.move_id.weight" t-options='{"widget": "float", "precision": 2}'/>
+                </td>
+            </t>
+        </xpath>
+    
+    </template>
+
+    <template id="weight_report_delivery_document" inherit_id="stock.report_delivery_document">
+        <xpath expr="//div[@name='signature']" position="before">
+            <div id="total" class="row justify-content-end">
+                <div class="col-4">
+                    <table class="table table-sm table-borderless">
+                        <tr class="border-black">
+                            <td>
+                                <strong>Total Weight (kg)</strong>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="o.total_weight"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//table[@name='stock_move_table']/thead/tr/th[3]" position="after">
+            <th name="th_weight" class="text-end">
+                <strong>Weight(kg)</strong>
+            </th>
+        </xpath>
+        <xpath expr="//table[@name='stock_move_table']/tbody/tr/td[3]" position="after">
+            <t t-if="o.purchase_id">
+                <td class="text-end">
+                   <span t-field="move.extra_weight" t-options='{"widget": "float", "precision": 2}'/>
+                </td>
+            </t>
+            <t t-else=" ">
+                <td class="text-end">
+                    <span t-field="move.weight"/>
+                </td>
+            </t>
+        </xpath>
+        <xpath expr="//table[@name='stock_move_line_table']/thead/tr/th[3]" position="after">
+            <th name="th_weight" class="text-center">
+                <strong>Weight(kg)</strong>
+            </th>
+        </xpath>
+    </template>
+
+    <template id="weight_stock_report_delivery_has_serial_move_line" inherit_id="stock.stock_report_delivery_has_serial_move_line">
+        <xpath expr="//td[2]" position="after">
+            <t t-if="o.purchase_id">
+                <td><span t-field="move_line.extra_weight"/></td>
+            </t>
+            <t t-else=" ">
+                <td><span t-field="move_line.weight"/></td>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="weight_stock_report_delivery_aggregated_move_lines" inherit_id="stock.stock_report_delivery_aggregated_move_lines">
+        <xpath expr="//td[@name='move_line_aggregated_qty_done']" position="after">
+            <td class="text-end">
+                <t t-if="aggregated_lines">
+                    <t t-if='o.purchase_id'>
+                        <t t-if="aggregated_lines[line].get('product') and aggregated_lines[line].get('qty_done')">
+                            <span t-options='{"widget": "float", "precision": 2}' t-esc="aggregated_lines[line]['extra_weight']"/>
+                        </t>
+                    </t>
+                    <t t-else=" ">
+                        <t t-if="aggregated_lines[line].get('product') and aggregated_lines[line].get('qty_done')">
+                            <span t-options='{"widget": "float", "precision": 2}' t-esc="aggregated_lines[line].get('product').weight * aggregated_lines[line].get('qty_done')"/>
+                        </t>
+                    </t>
+                </t>
+            </td>
+        </xpath>
+    </template>
+</odoo>
