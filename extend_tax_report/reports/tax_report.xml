@@ -1,0 +1,496 @@
+<odoo>
+    <data>
+
+        <template id="accounting_pdf_reports.report_tax">
+            <t t-call="web.html_container">
+                <t t-set="data_report_dpi" t-value="110"/>
+                <t t-call="web.external_layout">
+                    <xpath expr="." position="inside">
+                        <link rel="stylesheet" type="text/css" href="/extend_tax_report/static/src/css/style.css"/>
+                    </xpath>
+                    
+                    <div class="page">
+                        <h1>Tax Report</h1>
+                        <table>
+                            <div class="col-4">
+                                <strong>Company:</strong>
+                                <span t-esc="res_company.name"/>
+                            </div>
+                            <div class="col-4">
+                                <t>
+                                    <strong>Date:</strong>
+                                    <span t-esc="data['date_from']"/>
+                                </t>
+                                <span>-</span>
+                                <t>
+                                    <!--<strong>Date to :</strong>-->
+                                    <span t-esc="data['date_to']"/>
+                                </t>
+                            </div>
+                            <div class="col-4">
+                                <strong>Target Moves:</strong>
+                                <t>
+                                    <span t-if="data['target_move'] == 'all'">All Entries</span>
+                                    <span t-if="data['target_move'] == 'posted'">All Posted Entries</span>
+                                </t>
+                            </div>
+                        </table>
+                        <br/>
+                        <br/>
+                        <br/>
+                        <t t-set="partner_list" t-value="[]"/>
+                        <t t-set="all_total_debit_sale" t-value="0"/>
+                        <t t-set="all_total_credit_sale" t-value="0"/>
+                        <t t-set="all_total_balance_sale" t-value="0"/>
+                        <t t-set="all_total_debit_purchase" t-value="0"/>
+                        <t t-set="all_total_credit_purchase" t-value="0"/>
+                        <t t-set="all_total_balance_purchase" t-value="0"/>
+                        <t t-set="total_debit" t-value="0"/>
+                        <t t-set="total_credit" t-value="0"/>
+                        <t t-set="total_balance" t-value="0"/>
+                        <t t-foreach="data['tax_ids']" t-as="tax">
+                            <t t-if="tax == 1">
+                                <t t-if="data['customer_options'] == 'with_total'">
+                                    <h2>Total Sales Tax Details</h2>
+                                    <br/>
+                                    <table>
+                                        <tr>
+                                            <th>
+                                                Sale
+                                            </th>
+                                            <th>
+                                                Net
+                                            </th>
+                                            <th>
+                                                Tax
+                                            </th>
+                                        </tr>
+                                        <t t-foreach="lines['sale']" t-as="line">
+                                            <tr>
+                                                <td>
+                                                    <span t-esc="line.get('name')"/>
+                                                </td>
+                                                <td>
+                                                    <span t-att-style="style" t-esc="line.get('net')"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                                <td>
+                                                    <span t-att-style="style" t-esc="line.get('tax')"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                    <br/>
+                                    <br/>
+                                    <br/>
+                                </t>
+                                <t t-elif="data['customer_options'] == 'with_total_customer'">
+                                    <t t-set="filtered_lines_sales" t-value="env['account.move.line'].search([
+                                        ('tax_ids.type_tax_use','=','sale')
+                                    ])"/>
+                                    <h2>Sales Tax Details</h2>
+                                    <table>
+                                        <t t-foreach="lines['sale']" t-as="line">
+                                            <t t-foreach="line['vals']" t-as="tax_line">
+                                                <t t-if="tax_line[4] not in partner_list">
+                                                    <t t-set="dummy" t-value="partner_list.append(tax_line[4])"/>
+                                                </t>
+                                            </t>
+                                            <tr>
+                                                <td
+                                                        colspan="8"
+                                                        style="font-weight:bold; border:1px solid black; width:3%;vertical-align: middle; text-align:center; background-color:#e9ecef">
+                                                    <span t-esc="line.get('name')"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                >
+
+                                                    <span>Customer</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Debit</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Credit</span>
+                                                </td>
+                                                <td>
+                                                    <span>Balance</span>
+                                                </td>
+                                            </tr>
+                                            <t t-foreach="partner_list" t-as="partner">
+                                                <t t-set="total_debit"
+                                                   t-value="sum(move_line.debit for move_line in filtered_lines_sales if move_line.partner_id.name == partner)"/>
+                                                <t t-set="total_credit"
+                                                   t-value="sum(move_line.credit for move_line in filtered_lines_sales if move_line.partner_id.name == partner)"/>
+                                                <t t-set="total_balance"
+                                                   t-value="sum(move_line.balance for move_line in filtered_lines_sales if move_line.partner_id.name == partner)"/>
+                                                <t t-if="total_debit or total_credit">
+                                                    <tr>
+                                                        <td>
+                                                            <span t-esc="partner"/>
+                                                        </td>
+                                                        <t t-set="all_total_debit_sale"
+                                                           t-value="all_total_debit_sale + total_debit"/>
+                                                        <td>
+                                                            <span t-esc="total_debit"/>
+                                                        </td>
+                                                        <t t-set="all_total_credit_sale"
+                                                           t-value="all_total_credit_sale + total_credit"/>
+                                                        <td>
+                                                            <span t-esc="total_credit"/>
+                                                        </td>
+                                                        <t t-set="all_total_balance_sale"
+                                                           t-value="all_total_balance_sale + total_balance"/>
+                                                        <td>
+                                                            <span t-esc="total_balance"
+                                                                  t-options='{"widget": "float", "precision": 2}'/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                            <tr>
+                                                <td>
+                                                    Total
+                                                </td>
+                                                <td>
+                                                    <span t-esc="all_total_debit_sale"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="all_total_credit_sale"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="all_total_balance_sale"
+                                                          t-options='{"widget": "float", "precision": 2}'/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                    <br/>
+                                    <br/>
+                                </t>
+                                <t t-elif="data['customer_options'] == 'with_details_customer'">
+                                    <h2>Sales Tax Details For Every Customer</h2>
+                                    <br/>
+                                    <table>
+                                        <t t-foreach="lines['sale']" t-as="line">
+                                            <tr>
+                                                <td colspan="8">
+                                                    <span t-esc="line.get('name')"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span>#</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Date</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Source</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Customer</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Tax ID</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Debit</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Credit</span>
+                                                </td>
+                                                <td>
+
+                                                    <span>Balance</span>
+                                                </td>
+                                            </tr>
+                                            <t t-set="i" t-value="1"/>
+                                            <t t-set="totalBalance" t-value="0"/>
+                                            <tr t-foreach="line['vals']" t-as="tax_line">
+                                                <td>
+                                                    <span t-esc="i"/>
+                                                    <t t-set="i" t-value="i + 1"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[3]"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[0]"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[4]"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[5]"/>
+                                                </td>
+                                                <t t-set="all_total_debit_sale"
+                                                   t-value="all_total_debit_sale + tax_line[1]"/>
+                                                <td>
+                                                    <span t-esc="tax_line[1]"/>
+                                                </td>
+                                                <t t-set="all_total_credit_sale"
+                                                   t-value="all_total_credit_sale + tax_line[2]"/>
+                                                <td>
+                                                    <span t-esc="tax_line[2]"/>
+                                                </td>
+                                                <td>
+                                                    <t t-set="totalBalance"
+                                                       t-value="totalBalance + tax_line[1] - tax_line[2]"/>
+                                                    <t t-set="all_total_balance_sale"
+                                                       t-value="all_total_balance_sale + totalBalance"/>
+                                                    <span t-esc="totalBalance"
+                                                          t-options='{"widget": "float", "precision": 2}'/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <tr>
+                                            <td colspan="5">
+                                                Total
+                                            </td>
+                                            <td>
+                                                <t t-esc="all_total_debit_sale"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="all_total_credit_sale"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="all_total_balance_sale"
+                                                   t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                        </tr>
+                                        <br/>
+                                    </table>
+                                    <br/>
+                                </t>
+                            </t>
+                            <t t-elif="tax == 2">
+                                <t t-if="data['customer_options'] == 'with_total'">
+                                    <h2>Total Purchase Tax Details</h2>
+                                    <br/>
+                                    <table>
+                                        <tr>
+                                            <th>
+                                                Purchase
+                                            </th>
+                                            <th>
+                                                Net
+                                            </th>
+                                            <th>
+                                                Tax
+                                            </th>
+                                        </tr>
+                                        <t t-foreach="lines['purchase']" t-as="liner">
+                                            <tr>
+                                                <td>
+                                                    <span t-esc="liner.get('name')"/>
+                                                </td>
+                                                <td>
+                                                    <span t-att-style="style" t-esc="liner.get('net')"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                                <td>
+                                                    <span t-att-style="style" t-esc="liner.get('tax')"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+
+                                            </tr>
+                                        </t>
+                                    </table>
+                                </t>
+                                <t t-elif="data['customer_options'] == 'with_total_customer'">
+                                    <br/>
+                                    <br/>
+                                    <t t-set="filtered_lines_purchase" t-value="env['account.move.line'].search([
+                                        ('tax_ids.type_tax_use','=','purchase')
+                                    ])"/>
+                                    <h2>Purchase Tax Details</h2>
+                                    <br/>
+                                    <table>
+                                        <t t-foreach="lines['purchase']" t-as="line">
+                                            <t t-foreach="line['vals']" t-as="tax_line">
+                                                <t t-if="tax_line[4] not in partner_list">
+                                                    <t t-set="dummy" t-value="partner_list.append(tax_line[4])"/>
+                                                </t>
+                                            </t>
+                                            <tr>
+                                                <td colspan="8">
+                                                    <span t-esc="line.get('name')"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span>Vendor</span>
+                                                </td>
+                                                <td>
+                                                    <span>Debit</span>
+                                                </td>
+                                                <td>
+                                                    <span>Credit</span>
+                                                </td>
+                                                <td>
+                                                    <span>Balance</span>
+                                                </td>
+                                            </tr>
+                                            <t t-foreach="partner_list" t-as="partner">
+                                                <t t-set="total_debit"
+                                                   t-value="sum(move_line.debit for move_line in filtered_lines_purchase if move_line.partner_id.name == partner)"/>
+                                                <t t-set="total_credit"
+                                                   t-value="sum(move_line.credit for move_line in filtered_lines_purchase if move_line.partner_id.name == partner)"/>
+                                                <t t-set="total_balance"
+                                                   t-value="sum(move_line.balance for move_line in filtered_lines_purchase if move_line.partner_id.name == partner)"/>
+                                                <t t-if="total_debit or total_credit">
+                                                    <tr>
+                                                        <td>
+                                                            <span t-esc="partner"/>
+                                                        </td>
+                                                        <t t-set="all_total_debit_purchase"
+                                                           t-value="all_total_debit_purchase + total_debit"/>
+                                                        <td>
+                                                            <span t-esc="total_debit"/>
+                                                        </td>
+                                                        <t t-set="all_total_credit_purchase"
+                                                           t-value="all_total_credit_purchase + total_credit"/>
+                                                        <td>
+                                                            <span t-esc="total_credit"/>
+                                                        </td>
+                                                        <t t-set="all_total_balance_purchase"
+                                                           t-value="all_total_balance_purchase + total_balance"/>
+                                                        <td>
+                                                            <span t-esc="total_balance"
+                                                                  t-options='{"widget": "float", "precision": 2}'/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                            <tr>
+                                                <td>
+                                                    Total
+                                                </td>
+                                                <td>
+                                                    <span t-esc="all_total_debit_purchase"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="all_total_credit_purchase"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="all_total_balance_purchase"
+                                                          t-options='{"widget": "float", "precision": 2}'/>
+                                                </td>
+                                            </tr>
+
+                                        </t>
+                                    </table>
+                                </t>
+                                <t t-elif="data['customer_options'] == 'with_details_customer'">
+                                    <br/>
+                                    <h2>Purchase Tax Details For Every Customer</h2>
+                                    <table>
+                                        <t t-foreach="lines['purchase']" t-as="line">
+                                            <tr>
+                                                <td colspan="8">
+                                                    <span t-esc="line.get('name')"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span>#</span>
+                                                </td>
+                                                <td>
+                                                    <span>Date</span>
+                                                </td>
+                                                <td>
+                                                    <span>Source</span>
+                                                </td>
+                                                <td>
+                                                    <span>Customer</span>
+                                                </td>
+                                                <td>
+                                                    <span>Tax ID</span>
+                                                </td>
+                                                <td>
+                                                    <span>Debit</span>
+                                                </td>
+                                                <td>
+                                                    <span>Credit</span>
+                                                </td>
+                                                <td>
+                                                    <span>Balance</span>
+                                                </td>
+                                            </tr>
+                                            <t t-set="i" t-value="1"/>
+                                            <t t-set="totalBalance" t-value="0"/>
+                                            <tr t-foreach="line['vals']" t-as="tax_line">
+                                                <td>
+                                                    <span t-esc="i"/>
+                                                    <t t-set="i" t-value="i + 1"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[3]"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[0]"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[4]"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="tax_line[5]"/>
+                                                </td>
+                                                <td>
+                                                    <t t-set="all_total_debit_purchase"
+                                                       t-value="all_total_debit_purchase + tax_line[1]"/>
+                                                    <span t-esc="tax_line[1]"/>
+                                                </td>
+                                                <td>
+                                                    <t t-set="all_total_credit_purchase"
+                                                       t-value="all_total_credit_purchase + tax_line[2]"/>
+                                                    <span t-esc="tax_line[2]"/>
+                                                </td>
+                                                <td>
+                                                    <t t-set="totalBalance"
+                                                       t-value="totalBalance + tax_line[1] - tax_line[2]"/>
+                                                    <t t-set="all_total_balance_purchase"
+                                                       t-value="all_total_balance_purchase + totalBalance"/>
+                                                    <span t-esc="totalBalance"
+                                                          t-options='{"widget": "float", "precision": 2}'/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <tr>
+                                            <td colspan="5">
+                                                Total
+                                            </td>
+                                            <td>
+                                                <span t-esc="all_total_debit_purchase"/>
+                                            </td>
+                                            <td>
+                                                <span t-esc="all_total_credit_purchase"/>
+                                            </td>
+                                            <td>
+                                                <span t-esc="all_total_balance_purchase"/>
+                                            </td>
+                                        </tr>
+                                        <br/>
+                                    </table>
+                                </t>
+                            </t>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>
